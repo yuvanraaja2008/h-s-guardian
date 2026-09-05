@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { DosimeterOverlay } from './DosimeterOverlay';
 import {
   ArrowLeft,
-  Camera,
+  Camera as CameraIcon,
   RefreshCw,
   RotateCcw,
   Sparkles,
