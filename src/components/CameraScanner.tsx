@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { motion, AnimatePresence } from 'motion/react';
 import { DosimeterOverlay } from './DosimeterOverlay';
 import {
