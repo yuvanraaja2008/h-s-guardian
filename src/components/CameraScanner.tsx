@@ -60,7 +60,55 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   const [showVirtualBadge, setShowVirtualBadge] = useState(false);
   const [virtualConversion, setVirtualConversion] = useState(45.1); // ~50 ppm·hr default test
   const [selectedDosePreset, setSelectedDosePreset] = useState<number>(50);
+  
+const captureNativePhoto = async () => {
+  try {
+    setCameraError(null);
 
+    const photo = await Camera.getPhoto({
+      quality: 90,
+      resultType: CameraResultType.DataUrl,
+      source: CameraSource.Camera,
+      direction: facingMode === 'environment' ? 'rear' : 'front',
+    });
+
+    if (!photo.dataUrl) {
+      throw new Error('No photo was returned from the camera.');
+    }
+
+    const img = new Image();
+
+    img.onload = () => {
+      const canvas = capturedCanvasRef.current;
+
+      if (!canvas) return;
+
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+
+      const ctx = canvas.getContext('2d');
+
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        setHasCaptured(true);
+      }
+    };
+
+    img.onerror = () => {
+      setCameraError('Unable to process the captured image.');
+    };
+
+    img.src = photo.dataUrl;
+  } catch (err: any) {
+    console.warn('Native camera error:', err);
+
+    if (err?.message?.toLowerCase().includes('permission')) {
+      setCameraError('Camera permission is required. Please allow camera access and try again.');
+    } else {
+      setCameraError('Unable to open the camera.');
+    }
+  }
+};
   // Initialize rear camera
   const startCamera = useCallback(async (mode: 'environment' | 'user' = facingMode) => {
     try {
