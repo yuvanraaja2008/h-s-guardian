@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Camera, CameraResultType, CameraSource, CameraDirection } from '@capacitor/camera';
 import { motion, AnimatePresence } from 'motion/react';
 import { DosimeterOverlay } from './DosimeterOverlay';
 import {
@@ -69,7 +69,7 @@ const captureNativePhoto = async () => {
       quality: 90,
       resultType: CameraResultType.DataUrl,
       source: CameraSource.Camera,
-      direction: facingMode === 'environment' ? 'rear' : 'front',
+      direction: facingMode === 'environment' ? CameraDirection.Rear : CameraDirection.Front,
     });
 
     if (!photo.dataUrl) {
@@ -159,7 +159,9 @@ const captureNativePhoto = async () => {
   }, [facingMode, stream]);
 
   useEffect(() => {
+  if (!Capacitor.isNativePlatform()) {
     startCamera('environment');
+  }
 
     return () => {
       if (stream) {
@@ -257,8 +259,13 @@ const captureNativePhoto = async () => {
   };
 
   // Capture current frame onto canvas
-  const handleCapture = () => {
-    const video = videoRef.current;
+  const handleCapture = async () => {
+  if (Capacitor.isNativePlatform()) {
+    await captureNativePhoto();
+    return;
+  }
+
+  const video = videoRef.current;
     const canvas = capturedCanvasRef.current;
 
     // Haptic vibration feedback if supported
